@@ -88,11 +88,11 @@ const S: Record<string, React.CSSProperties> = {
   },
 
   title: {
-    fontSize: "56px",
-    lineHeight: 1.05,
+    fontSize: "38px",
+    lineHeight: 1.2,
     fontWeight: 900,
     margin: 0,
-    letterSpacing: "-1px",
+    letterSpacing: "-0.5px",
   },
 
   subtitle: {
@@ -121,17 +121,17 @@ const S: Record<string, React.CSSProperties> = {
   },
 
   grid: {
-    marginTop: "24px",
+    marginTop: "20px",
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "18px",
+    gridTemplateColumns: "1fr",
+    gap: "14px",
   },
 
   card: {
     background: "#fff",
-    borderRadius: "22px",
-    padding: "26px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
+    borderRadius: "20px",
+    padding: "20px",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
   },
 
   cardNumber: {
