@@ -652,19 +652,40 @@ export default function TestPage() {
     return blob;
   };
 
-  const savePosterToAlbum = async () => {
-    if (!profile) return;
+const savePosterToAlbum = async () => {
+  if (!profile) return;
 
-    try {
-      const blob = await buildPosterBlob();
-      if (!blob) return;
-      downloadBlob(blob, "ArtDNA-Europe-Poster.png");
-      alert("海报已保存（下载）✅\n你可以在下载文件中找到它，再保存到相册。");
-    } catch (e) {
-      console.error(e);
-      alert("保存海报失败：请刷新页面重试");
+  try {
+    const blob = await buildPosterBlob();
+    if (!blob) return;
+
+    const file = new File([blob], "ArtDNA-Europe-Poster.png", {
+      type: "image/png",
+    });
+
+    const nav = navigator as Navigator & {
+      canShare?: (data?: ShareData) => boolean;
+      share?: (data?: ShareData) => Promise<void>;
+    };
+
+    // 手机上优先调起系统分享面板
+    if (nav.share && nav.canShare && nav.canShare({ files: [file] })) {
+      await nav.share({
+        files: [file],
+        title: "ArtDNA · Europe",
+        text: "保存你的 ArtDNA 海报",
+      });
+      return;
     }
-  };
+
+    // 不支持系统分享时，退回下载
+    downloadBlob(blob, "ArtDNA-Europe-Poster.png");
+    alert("海报已下载 ✅\n如果没有进入相册，请在下载文件中打开后手动保存图片。");
+  } catch (e) {
+    console.error(e);
+    alert("保存海报失败：请刷新页面重试");
+  }
+};
 
   return (
     <main style={S.page}>
@@ -785,33 +806,34 @@ export default function TestPage() {
 }
 
 const S: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: "100vh",
-    background: "#f3f3f3",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    color: "#111",
-  },
-  card: {
-    width: 760,
-    maxWidth: "100%",
-    background: "#fff",
-    borderRadius: 20,
-    boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
-    padding: 28,
-  },
-  header: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-    marginBottom: 18,
-  },
-  brand: { fontSize: 22, fontWeight: 800, letterSpacing: 0.2 },
+page: {
+  minHeight: "100vh",
+  background: "#f3f3f3",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "flex-start",
+  padding: 12,
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  color: "#111",
+},
+card: {
+  width: "100%",
+  maxWidth: 520,
+  background: "#fff",
+  borderRadius: 18,
+  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+  padding: 18,
+},
+header: {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: 8,
+  marginBottom: 16,
+},
+brand: { fontSize: 20, fontWeight: 800, letterSpacing: 0.2 },
   small: { fontSize: 12, color: "#666", marginTop: 6 },
   backLink: { fontSize: 12, color: "#111", textDecoration: "none", opacity: 0.75 },
 
@@ -821,58 +843,89 @@ const S: Record<string, React.CSSProperties> = {
   progressText: { marginTop: 8, fontSize: 12, color: "#666" },
 
   list: { display: "flex", flexDirection: "column", gap: 16, marginBottom: 18 },
-  qBlock: { padding: 16, borderRadius: 16, background: "#fafafa", border: "1px solid #eee" },
-  qTitle: { fontSize: 14, fontWeight: 700, marginBottom: 10, lineHeight: 1.5 },
+qBlock: {
+  padding: 14,
+  borderRadius: 14,
+  background: "#fafafa",
+  border: "1px solid #eee",
+},
+qTitle: {
+  fontSize: 15,
+  fontWeight: 700,
+  marginBottom: 10,
+  lineHeight: 1.6,
+},
   options: { display: "grid", gridTemplateColumns: "1fr", gap: 10 },
 
-  optionBtn: {
-    textAlign: "left",
-    padding: "12px 14px",
-    borderRadius: 14,
-    border: "1px solid #e6e6e6",
-    background: "#fff",
-    cursor: "pointer",
-    lineHeight: 1.35,
-  },
+optionBtn: {
+  textAlign: "left",
+  padding: "14px 14px",
+  borderRadius: 12,
+  border: "1px solid #e6e6e6",
+  background: "#fff",
+  cursor: "pointer",
+  lineHeight: 1.5,
+  fontSize: 14,
+},
   optionBtnSelected: {
     background: "#111",
     color: "#fff",
     border: "1px solid #111",
   },
 
-  primaryBtn: {
-    width: "100%",
-    padding: "14px 16px",
-    borderRadius: 14,
-    background: "#111",
-    color: "#fff",
-    border: "none",
-    fontSize: 14,
-    fontWeight: 700,
-    cursor: "pointer",
-  },
-  secondaryBtn: {
-    width: "100%",
-    padding: "14px 16px",
-    borderRadius: 14,
-    background: "#eee",
-    color: "#111",
-    border: "none",
-    fontSize: 14,
-    fontWeight: 700,
-    cursor: "pointer",
-  },
+primaryBtn: {
+  width: "100%",
+  padding: "16px 16px",
+  borderRadius: 14,
+  background: "#111",
+  color: "#fff",
+  border: "none",
+  fontSize: 15,
+  fontWeight: 700,
+  cursor: "pointer",
+},
+secondaryBtn: {
+  width: "100%",
+  padding: "16px 16px",
+  borderRadius: 14,
+  background: "#eee",
+  color: "#111",
+  border: "none",
+  fontSize: 15,
+  fontWeight: 700,
+  cursor: "pointer",
+},
 
   resultWrap: { paddingTop: 20, paddingBottom: 10 },
   resultTop: { textAlign: "center" },
   resultLabel: { fontSize: 12, color: "#666" },
-  resultTitle: { fontSize: 46, fontWeight: 900, marginTop: 10, letterSpacing: "-0.5px" },
-  resultSub: { fontSize: 18, color: "#444", marginTop: 8, fontWeight: 700 },
+resultTitle: {
+  fontSize: 34,
+  fontWeight: 900,
+  marginTop: 10,
+  letterSpacing: "-0.5px",
+  lineHeight: 1.1,
+},
+resultSub: {
+  fontSize: 16,
+  color: "#444",
+  marginTop: 8,
+  fontWeight: 700,
+},
   keywords: { marginTop: 14, fontSize: 14, color: "#666", letterSpacing: "0.5px" },
 
-  desc: { marginTop: 18, lineHeight: 1.9, color: "#333", fontSize: 16 },
-
-  row: { marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
+desc: {
+  marginTop: 18,
+  lineHeight: 1.9,
+  color: "#333",
+  fontSize: 15,
+},
+row: {
+  marginTop: 16,
+  display: "grid",
+  gridTemplateColumns: "1fr",
+  gap: 12,
+},
   kv: { padding: 14, borderRadius: 16, background: "#fafafa", border: "1px solid #eee" },
   kvWide: { marginTop: 12, padding: 14, borderRadius: 16, background: "#fafafa", border: "1px solid #eee" },
   k: { fontSize: 12, color: "#666", marginBottom: 6 },
@@ -885,15 +938,15 @@ const S: Record<string, React.CSSProperties> = {
     gap: 10,
   },
 
-  ghostBtn: {
-    width: "100%",
-    padding: "14px 16px",
-    borderRadius: 14,
-    background: "#f7f7f7",
-    color: "#111",
-    border: "1px solid #e5e5e5",
-    fontSize: 14,
-    fontWeight: 700,
-    cursor: "pointer",
-  },
+ghostBtn: {
+  width: "100%",
+  padding: "16px 16px",
+  borderRadius: 14,
+  background: "#f7f7f7",
+  color: "#111",
+  border: "1px solid #e5e5e5",
+  fontSize: 15,
+  fontWeight: 700,
+  cursor: "pointer",
+},
 };
